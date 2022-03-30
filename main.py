@@ -55,6 +55,7 @@ class UI:
         global isGameOver
         isGameOver = True
     def startGame(self):
+        global isGameStarting
         print("in start game")
         # Start Game Text
         screen.fill((100,100,100))
@@ -140,7 +141,7 @@ class Player:
         self.flipImageHorizontal = False
         self.direction = 0
         self.isAttacking = False
-        self.health = 5
+        self.health = 100
         self.slashSound = mixer.Sound("assets/soundeffects/mixkit-metal-hit-woosh-1485.wav")
         self.slashSound.set_volume(0.4)
 
@@ -502,7 +503,7 @@ class GameObjectManager():
 isGameRunning = True
 delayTime = 20
 ui = UI()
-#ui.backgroundMusic()
+ui.backgroundMusic()
 gom = GameObjectManager()
 player = Player()
 numOfKills = 0
@@ -516,7 +517,7 @@ def gameInit():
     print("in game init")
     global isGameRunning, delayTime, player,numOfKills, listOfZombies, backgroundX, isGameOver, pauseUpdate, isGameStarting
     isGameRunning = True
-    isGameStarting = True
+    isGameStarting = False
     delayTime = 20
     player = Player()
     numOfKills = 0
