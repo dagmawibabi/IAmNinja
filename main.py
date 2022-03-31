@@ -26,23 +26,28 @@ class UI:
         mixer.music.play(-1)
     def pauseGame(self):
         global pauseUpdate
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 100)
+        self.font = pygame.font.Font("assets/fonts/PressStart2P-vaV7.ttf", 60)
         self.pausedGame = self.font.render("Paused", True, (255, 255, 255))
         if pauseUpdate == True:
             pauseUpdate = False
         else:
             pauseUpdate = True        
-        screen.blit(self.pausedGame, (((screenW / 2) - 180), ((screenH / 2) - 120)))
+        screen.blit(self.pausedGame, (((screenW / 2) - 180), ((screenH / 2) - 150)))
         pygame.display.update()
-    def displayGameOverText(self):
-        # Game Over Text
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 100)
-        self.gameOverText = self.font.render("Game Over", True, (255, 255, 255))
-        screen.blit(self.gameOverText, (((screenW / 2) - 200), ((screenH / 2) - 120)))
         # Space to play again
         self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
-        self.spaceToPlay = self.font.render("Press Space Key To Play!", True, (255, 255, 255))
-        screen.blit(self.spaceToPlay, (((screenW / 2) - 115), ((screenH / 2) + 30)))
+        self.pToPlay = self.font.render("Press P To Play!", True, (255, 255, 255))
+        screen.blit(self.pToPlay, (((screenW / 2) - 75), ((screenH / 2) + 10)))
+
+    def displayGameOverText(self):
+        # Game Over Text
+        self.font = pygame.font.Font("assets/fonts/PressStart2P-vaV7.ttf", 70)
+        self.gameOverText = self.font.render("Game Over", True, (255, 255, 255))
+        screen.blit(self.gameOverText, (((screenW / 2) - 310), ((screenH / 2) - 170)))
+        # Space to play again
+        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
+        self.spaceToPlay = self.font.render("Press Space To Play!", True, (255, 255, 255))
+        screen.blit(self.spaceToPlay, (((screenW / 2) - 110), ((screenH / 2) + 30)))
         # Q to quit 
         self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
         self.qToQuit = self.font.render("Press Q To Quit!", True, (255, 255, 255))
@@ -56,13 +61,12 @@ class UI:
         isGameOver = True
     def startGame(self):
         global isGameStarting
-        print("in start game")
         # Start Game Text
         screen.fill((100,100,100))
         screen.blit(background, (backgroundX, 0))
         self.font = pygame.font.Font("assets/fonts/PressStart2P-vaV7.ttf", 50)
         self.startGameText = self.font.render("I Am Ninja.", True, (255, 255, 255))
-        screen.blit(self.startGameText, (((screenW / 2) - 250), ((screenH / 2) - 50)))
+        screen.blit(self.startGameText, (((screenW / 2) - 250), ((screenH / 2) - 150)))
         # Space to play again
         self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
         self.spaceToPlay = self.font.render("Press Space Key To Play!", True, (255, 255, 255))
@@ -141,7 +145,7 @@ class Player:
         self.flipImageHorizontal = False
         self.direction = 0
         self.isAttacking = False
-        self.health = 100
+        self.health = 5
         self.slashSound = mixer.Sound("assets/soundeffects/mixkit-metal-hit-woosh-1485.wav")
         self.slashSound.set_volume(0.4)
 
@@ -514,7 +518,6 @@ isGameOver = False
 pauseUpdate = False
 isGameStarting = True
 def gameInit():
-    print("in game init")
     global isGameRunning, delayTime, player,numOfKills, listOfZombies, backgroundX, isGameOver, pauseUpdate, isGameStarting
     isGameRunning = True
     isGameStarting = False
