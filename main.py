@@ -145,7 +145,7 @@ class Player:
         self.flipImageHorizontal = False
         self.direction = 0
         self.isAttacking = False
-        self.health = 5
+        self.health = 100
         self.slashSound = mixer.Sound("assets/soundeffects/mixkit-metal-hit-woosh-1485.wav")
         self.slashSound.set_volume(0.4)
 
