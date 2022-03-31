@@ -591,9 +591,6 @@ while isGameRunning:
                 zombies.update(player.x, player.y, player.isAttacking)
                 if zombies.isDead == False:
                     player.update(zombies)
-    if pauseUpdate == True:
-        print("Hello")
-        #gom.cleanZombies()
     if isGameOver == True:
         ui.displayGameOverText()
     pygame.display.update()
