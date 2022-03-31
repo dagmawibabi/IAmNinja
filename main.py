@@ -1,6 +1,9 @@
 # Libraries 
+from glob import glob
 import math
+from pickle import TRUE
 import random
+from turtle import Screen
 import pygame
 from pygame import mixer
 # Pygame Setup
@@ -17,13 +20,17 @@ listOfZombies = []
 
 # UI
 pauseUpdate = False
-font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 30)
+font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
 class UI:
     def __init__(self):
         pass 
     def backgroundMusic(self):
-        mixer.music.load("assets/music/TWD.wav")
-        mixer.music.play(-1)
+        global isSoundMute
+        if isSoundMute == False:
+            mixer.music.load("assets/music/TWD.wav")
+            mixer.music.play(-1)
+        else:
+            mixer.music.stop()
     def pauseGame(self):
         global pauseUpdate
         self.font = pygame.font.Font("assets/fonts/PressStart2P-vaV7.ttf", 60)
@@ -51,11 +58,11 @@ class UI:
         # Q to quit 
         self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
         self.qToQuit = self.font.render("Press Q To Quit!", True, (255, 255, 255))
-        screen.blit(self.qToQuit, (((screenW / 2) - 70), ((screenH / 2) + 290)))
+        screen.blit(self.qToQuit, (((screenW / 2) - 70), ((screenH / 2) + 260)))
         # M to mute
         self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
         self.mToMute = self.font.render("Press M To Mute!", True, (255, 255, 255))
-        screen.blit(self.mToMute, (((screenW / 2) - 75), ((screenH / 2) + 340)))
+        screen.blit(self.mToMute, (((screenW / 2) - 75), ((screenH / 2) + 310)))
     def gameOver(self):
         global isGameOver
         isGameOver = True
@@ -77,6 +84,7 @@ class UI:
 # Player
 class Player:
     def __init__(self):
+        self.isMoving = False
         self.isDead = False
         self.attackSize = 0.2
         self.x = 0
@@ -145,10 +153,9 @@ class Player:
         self.flipImageHorizontal = False
         self.direction = 0
         self.isAttacking = False
-        self.health = 100
+        self.health = 10
         self.slashSound = mixer.Sound("assets/soundeffects/mixkit-metal-hit-woosh-1485.wav")
         self.slashSound.set_volume(0.4)
-
     def blit(self):
         screen.blit(self.image, (self.x, self.y))
     def moveIdle(self):
@@ -156,27 +163,33 @@ class Player:
         self.direction = 0
         self.currentAnimation = self.playerIdleAnimation
         self.currentScale = self.idleScale
+        self.isMoving = False
     def moveLeft(self):
         self.direction = 1
         self.currentAnimation = self.playerWalkAnimation
         self.flipImageHorizontal = True
         self.currentScale = self.runScale
+        self.isMoving = True
     def moveRight(self):
         self.direction = 2
         self.currentAnimation = self.playerWalkAnimation
         self.flipImageHorizontal = False
         self.currentScale = self.runScale
+        self.isMoving = True
     def moveAttack(self):
         self.direction = 0
         self.isAttacking = True
         self.currentAnimation = self.playerAttackAnimation
         self.currentScale = self.attackScale
         self.slashSound.play()
+        self.isMoving = False
     # Post Process
     def animate(self):
         self.image = self.currentAnimation[self.animationIndex]
         self.image = pygame.transform.scale(self.image, self.currentScale)
         self.image = pygame.transform.flip(self.image, self.flipImageHorizontal, False)
+        if self.isMoving == True:
+            WalkingAnimation(self.x, self.y, self.flipImageHorizontal)
         self.healthScore()
     # Box Constrains
     def windowConstraints(self):
@@ -204,7 +217,7 @@ class Player:
     def healthScore(self):
         self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
         if self.health >= 80:
-            healthColor = (0, 0, 255)
+            healthColor = (0, 255, 255)
         elif self.health >= 50:
             healthColor = (0, 255, 0)
         elif self.health >= 20:
@@ -241,6 +254,32 @@ class Player:
             self.currentScale = self.deadScale
             self.image = self.playerDeadAnimation[len(self.playerDeadAnimation) - 1]
             self.image = pygame.transform.scale(self.image, self.deadScale)
+
+walkAnimationIndex = 0
+def WalkingAnimation(x, y, flipImageHorizontal):
+    global walkAnimationIndex
+    playerWalkDustAnimation = [
+        pygame.image.load("assets/vfx/dustCloud/1.png"),
+        pygame.image.load("assets/vfx/dustCloud/2.png"),
+        pygame.image.load("assets/vfx/dustCloud/3.png"),
+        pygame.image.load("assets/vfx/dustCloud/4.png"),
+        pygame.image.load("assets/vfx/dustCloud/5.png"),
+        pygame.image.load("assets/vfx/dustCloud/6.png"),
+        pygame.image.load("assets/vfx/dustCloud/7.png"),
+        pygame.image.load("assets/vfx/dustCloud/8.png"),
+    ]
+    walkAnimationIndex += 1
+    if walkAnimationIndex > (len(playerWalkDustAnimation) - 1):
+        walkAnimationIndex = 0
+    image = playerWalkDustAnimation[walkAnimationIndex].convert_alpha()
+    image.set_alpha(80)
+    image = pygame.transform.scale(image, (50, 50))
+    image = pygame.transform.flip(image, flipImageHorizontal, False)
+    if flipImageHorizontal == True:
+        x += 80
+    else:      
+        x -= 15
+    screen.blit(image, (x, y + 100))
 
 
 
@@ -451,8 +490,9 @@ class Zombie:
                 self.moveIdle()
         if isPlayerAttacking == True:
             if distance < 140:
+                global attackSize
                 self.bodyCutSound.play()
-                self.health -= 1
+                self.health -= attackSize
                 self.currentAnimation = self.zombieAttackAnimation
         
             
@@ -479,6 +519,24 @@ class Zombie:
                 #    del listOfZombies[0]
                 zombie = Zombie()
                 listOfZombies.append(zombie)
+                global attackSize, player
+                randomRoll = random.randint(0, 3)
+                if randomRoll == 0:                    
+                    attackSize += random.randint(1, 3)
+                    if attackSize >= 6:
+                        attackSize = 6
+                if randomRoll == 1:                    
+                    player.health += random.randint(5, 10)
+                    if player.health >= 100:
+                        player.health = 100
+                if randomRoll == 2:                    
+                    player.speed += random.randint(5, 10)
+                    if player.speed >= 20:
+                        player.speed = 20
+                if randomRoll == 3:                    
+                    zombie.speed += random.randint(5, 10)
+                    if zombie.speed >= 20:
+                        zombie.speed = 20
                 self.y += 20  
             self.currentAnimation = self.zombieDeadAnimation
             self.image = self.zombieDeadAnimation[len(self.zombieDeadAnimation) - 1]
@@ -502,11 +560,45 @@ class GameObjectManager():
             listOfZombies.pop()
         pauseUpdate = False
 
+def muteSound(state):
+    if state == True:
+        mixer.Sound.stop()
+
+class rainDrop:
+    def __init__(self) -> None:
+        self.x = random.randint(0, screenW)
+        self.y = 0
+        self.w = random.randint(0, 3)
+        self.h = random.randint(0, 4)
+class Weather():
+    def __init__(self) -> None:
+        pass
+    def rainOrSnow(self):
+        global ros, rainSnowSpeed
+        if ros == 0:
+            self.color = (0, 0, 255)
+        else:
+            self.color = (255, 255, 255)
+        rain = rainDrop()
+        listOfRainDrops.append(rain)
+        for i in range(0, len(listOfRainDrops) - 1):
+            listOfRainDrops[i].y += rainSnowSpeed
+            if listOfRainDrops[i].y >= screenH - 46:
+                listOfRainDrops[i].y = screenH - 46
+            #listOfRainDrops[i] += 2
+            pygame.draw.rect(screen, self.color, (listOfRainDrops[i].x, listOfRainDrops[i].y, listOfRainDrops[i].w ,listOfRainDrops[i].h), 2)
 
 # Game Loop
+attackSize = 2
+ros = random.randint(0, 1)
+rainSnowSpeed = random.randint(2, 6)
+rain = rainDrop()
+listOfRainDrops = [rain]
+isSoundMute = False
 isGameRunning = True
 delayTime = 20
 ui = UI()
+weather = Weather()
 ui.backgroundMusic()
 gom = GameObjectManager()
 player = Player()
@@ -518,7 +610,11 @@ isGameOver = False
 pauseUpdate = False
 isGameStarting = True
 def gameInit():
-    global isGameRunning, delayTime, player,numOfKills, listOfZombies, backgroundX, isGameOver, pauseUpdate, isGameStarting
+    global isGameRunning, delayTime, player,numOfKills, listOfZombies, backgroundX, isGameOver, pauseUpdate, isGameStarting, isSoundMute, listOfRainDrops, ros, rainSnowSpeed
+    ros = random.randint(0, 1)
+    rainSnowSpeed = random.randint(2, 6)
+    rain = rainDrop()
+    listOfRainDrops = [rain]
     isGameRunning = True
     isGameStarting = False
     delayTime = 20
@@ -535,7 +631,7 @@ def gameInit():
     pauseUpdate = False
 
 
-
+# Game Loop
 while isGameRunning:
     if isGameStarting == True:
         ui.startGame()
@@ -554,6 +650,8 @@ while isGameRunning:
         # Score
         playerKills = font.render("Kills " + str(numOfKills), True, (255, 255, 255))
         screen.blit(playerKills, (10, 5))
+        playerPower = font.render("Power " + str(attackSize), True, (255, 255, 255))
+        screen.blit(playerPower, (10, 35))
 
     # Events
     for event in pygame.event.get():
@@ -576,6 +674,14 @@ while isGameRunning:
                 isGameStarting == False    
             if event.key == pygame.K_p:
                 ui.pauseGame()
+            if event.key == pygame.K_m:
+                if isSoundMute == True:
+                    isSoundMute = False
+                    ui.backgroundMusic()
+                elif isSoundMute == False:
+                    isSoundMute = True
+                    ui.backgroundMusic()
+
         if event.type == pygame.KEYUP:
                 player.moveIdle() 
         
@@ -593,6 +699,8 @@ while isGameRunning:
                     player.update(zombies)
     if isGameOver == True:
         ui.displayGameOverText()
+    weather.rainOrSnow()
+
     pygame.display.update()
 pygame.quit()
 
