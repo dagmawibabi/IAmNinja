@@ -79,6 +79,19 @@ class UI:
         self.spaceToPlay = self.font.render("Press Space Key To Play!", True, (255, 255, 255))
         screen.blit(self.spaceToPlay, (((screenW / 2) - 115), ((screenH / 2) + 30)))
         #pygame.display.update()
+    def stats(self):
+        font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
+        playerKills = font.render("Kills " + str(numOfKills), True, (0, 255, 255))
+        screen.blit(playerKills, (10, 5))
+        playerPower = font.render("Power " + str(attackSize), True, (0, 255, 255))
+        screen.blit(playerPower, (10, 30))
+        playerSpeed = font.render("Speed " + str(player.speed), True, (0, 255, 255))
+        screen.blit(playerSpeed, (10, 58))
+        # Zombie Stats
+        zombiePower = font.render("Power " + str(int(player.attackSize) * 10 + 1), True, (0, 255, 0))
+        screen.blit(zombiePower, (screenW - 100, 5))
+        zombieSpeed = font.render("Speed " + str(listOfZombies[-1].speed), True, (0, 255, 0))
+        screen.blit(zombieSpeed, (screenW - 100, 30))
 
 
 # Player
@@ -281,12 +294,52 @@ def WalkingAnimation(x, y, flipImageHorizontal):
         x -= 15
     screen.blit(image, (x, y + 100))
 
+splashAnimationIndex = 0
+def waterSplashAnimation(x, y):
+    global splashAnimationIndex, delayTime, ros
+    if ros == 0:
+        delayTime = 0
+    splashAnimation = [
+        pygame.image.load("assets/vfx/waterSplash/1.png"),
+        pygame.image.load("assets/vfx/waterSplash/2.png"),
+        pygame.image.load("assets/vfx/waterSplash/3.png"),
+        pygame.image.load("assets/vfx/waterSplash/4.png"),
+        pygame.image.load("assets/vfx/waterSplash/5.png"),
+        pygame.image.load("assets/vfx/waterSplash/6.png"),
+    ]
+    splashAnimationIndex += 1
+    if splashAnimationIndex > (len(splashAnimation) - 1):
+        splashAnimationIndex = 0
+    image = splashAnimation[splashAnimationIndex].convert_alpha()
+    image.set_alpha(80)
+    image = pygame.transform.scale(image, (40, 40))
+    screen.blit(image, (x, y-30))
+
+powerUpAnimationIndex = 0
+def powerUpAnimation(x, y):
+    global powerUpAnimationIndex
+    playerPowerUpAnimation = [
+        pygame.image.load("assets/vfx/powerUp/1.png"),
+        pygame.image.load("assets/vfx/powerUp/2.png"),
+        pygame.image.load("assets/vfx/powerUp/3.png"),
+        pygame.image.load("assets/vfx/powerUp/4.png"),
+        pygame.image.load("assets/vfx/powerUp/5.png"),
+    ]
+    powerUpAnimationIndex += 1
+    if powerUpAnimationIndex > (len(playerPowerUpAnimation) - 1):
+        powerUpAnimationIndex = 0
+    image = playerPowerUpAnimation[powerUpAnimationIndex]
+    image = pygame.transform.scale(image, (200, 200))
+    screen.blit(image, (x - 20, y - 20))
+
 
 
 # Zombie
+zombieAverageHealth = 80
 class Zombie:
     def __init__(self):
-        self.health = 80
+        global zombieAverageHealth
+        self.health = zombieAverageHealth
         self.x = random.randint(0, screenW - 220)
         self.y = screenH - 220
         self.speed = 6
@@ -519,24 +572,8 @@ class Zombie:
                 #    del listOfZombies[0]
                 zombie = Zombie()
                 listOfZombies.append(zombie)
-                global attackSize, player
-                randomRoll = random.randint(0, 3)
-                if randomRoll == 0:                    
-                    attackSize += random.randint(1, 3)
-                    if attackSize >= 6:
-                        attackSize = 6
-                if randomRoll == 1:                    
-                    player.health += random.randint(5, 10)
-                    if player.health >= 100:
-                        player.health = 100
-                if randomRoll == 2:                    
-                    player.speed += random.randint(5, 10)
-                    if player.speed >= 20:
-                        player.speed = 20
-                if randomRoll == 3:                    
-                    zombie.speed += random.randint(5, 10)
-                    if zombie.speed >= 20:
-                        zombie.speed = 20
+                # Power Up
+                powerUp.randomPowerUp(zombie)
                 self.y += 20  
             self.currentAnimation = self.zombieDeadAnimation
             self.image = self.zombieDeadAnimation[len(self.zombieDeadAnimation) - 1]
@@ -568,27 +605,77 @@ class rainDrop:
     def __init__(self) -> None:
         self.x = random.randint(0, screenW)
         self.y = 0
-        self.w = random.randint(0, 3)
-        self.h = random.randint(0, 4)
+        self.w = random.randint(0, 4)
+        self.h = random.randint(0, 8)
 class Weather():
     def __init__(self) -> None:
         pass
-    def rainOrSnow(self):
+    def rainOrSnow(self):        
         global ros, rainSnowSpeed
         if ros == 0:
-            self.color = (0, 0, 255)
+            self.color = (0, 200, 255)
         else:
             self.color = (255, 255, 255)
         rain = rainDrop()
         listOfRainDrops.append(rain)
+        lastDrop = 0
         for i in range(0, len(listOfRainDrops) - 1):
             listOfRainDrops[i].y += rainSnowSpeed
             if listOfRainDrops[i].y >= screenH - 46:
                 listOfRainDrops[i].y = screenH - 46
+                lastDrop = listOfRainDrops[i]
+                #listOfRainDrops.append(rain)
             #listOfRainDrops[i] += 2
             pygame.draw.rect(screen, self.color, (listOfRainDrops[i].x, listOfRainDrops[i].y, listOfRainDrops[i].w ,listOfRainDrops[i].h), 2)
+        if lastDrop != 0 and ros == 0:
+            waterSplashAnimation(lastDrop.x, lastDrop.y)
+        if lastDrop != 0:
+            del lastDrop
+
+class PowerUps():
+    def __init__(self) -> None:
+        pass
+    def randomPowerUp(self, zombie):
+        global attackSize, player
+        randomRoll = random.randint(0, 5) 
+        randomRoll = 0
+        # Increase Power       
+        if randomRoll == 0:                    
+            attackSize += random.randint(1, 3)
+            if attackSize >= 6:
+                attackSize = 6
+            powerUpAnimation(player.x, player.y)
+        # Increase Health       
+        if randomRoll == 1:                    
+            player.health += random.randint(5, 10)
+            if player.health >= 100:
+                player.health = 100
+            powerUpAnimation(player.x, player.y)
+        # Increase Speed       
+        if randomRoll == 2:                    
+            player.speed += random.randint(5, 10)
+            if player.speed >= 20:
+                player.speed = 20
+            powerUpAnimation(player.x, player.y)
+        # Increase Zombie Speed       
+        if randomRoll == 3:                    
+            zombie.speed += random.randint(5, 10)
+            if zombie.speed >= 20:
+                zombie.speed = 20
+        # Increase Zombie Health       
+        if randomRoll == 4:                    
+            zombie.health += random.randint(5, 10)
+            if zombie.health >= 200:
+                zombie.health = 200
+        # Increase Zombie Power       
+        if randomRoll == 5:                    
+            player.attackSize += random.randint(0, 1)
+            if player.attackSize >= 20:
+                player.attackSize = 20
+
 
 # Game Loop
+powerUp = PowerUps()
 attackSize = 2
 ros = random.randint(0, 1)
 rainSnowSpeed = random.randint(2, 6)
@@ -647,11 +734,9 @@ while isGameRunning:
             for zombies in listOfZombies:
                 zombies.blit()
             player.blit()
-        # Score
-        playerKills = font.render("Kills " + str(numOfKills), True, (255, 255, 255))
-        screen.blit(playerKills, (10, 5))
-        playerPower = font.render("Power " + str(attackSize), True, (255, 255, 255))
-        screen.blit(playerPower, (10, 35))
+        # Stats
+        # Player Stats
+        ui.stats()
 
     # Events
     for event in pygame.event.get():
