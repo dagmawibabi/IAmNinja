@@ -1,11 +1,20 @@
 # Libraries 
-from glob import glob
 import math
-from pickle import TRUE
 import random
-from turtle import Screen
 import pygame
 from pygame import mixer
+import sys
+import os
+
+def resource_path(resource_path):
+    try:
+    # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, resource_path)
+
 # Pygame Setup
 pygame.init()
 
@@ -20,20 +29,20 @@ listOfZombies = []
 
 # UI
 pauseUpdate = False
-font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
+font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 25)
 class UI:
     def __init__(self):
         pass 
     def backgroundMusic(self):
         global isSoundMute
         if isSoundMute == False:
-            mixer.music.load("assets/music/TWD.wav")
+            mixer.music.load(resource_path("assets/music/TWD.wav"))
             mixer.music.play(-1)
         else:
             mixer.music.stop()
     def pauseGame(self):
         global pauseUpdate
-        self.font = pygame.font.Font("assets/fonts/PressStart2P-vaV7.ttf", 60)
+        self.font = pygame.font.Font(resource_path("assets/fonts/PressStart2P-vaV7.ttf"), 60)
         self.pausedGame = self.font.render("Paused", True, (255, 255, 255))
         if pauseUpdate == True:
             pauseUpdate = False
@@ -42,25 +51,25 @@ class UI:
         screen.blit(self.pausedGame, (((screenW / 2) - 180), ((screenH / 2) - 150)))
         pygame.display.update()
         # Space to play again
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 25)
         self.pToPlay = self.font.render("Press P To Play!", True, (255, 255, 255))
         screen.blit(self.pToPlay, (((screenW / 2) - 75), ((screenH / 2) + 10)))
 
     def displayGameOverText(self):
         # Game Over Text
-        self.font = pygame.font.Font("assets/fonts/PressStart2P-vaV7.ttf", 70)
+        self.font = pygame.font.Font(resource_path("assets/fonts/PressStart2P-vaV7.ttf"), 70)
         self.gameOverText = self.font.render("Game Over", True, (255, 255, 255))
         screen.blit(self.gameOverText, (((screenW / 2) - 310), ((screenH / 2) - 170)))
         # Space to play again
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 25)
         self.spaceToPlay = self.font.render("Press Space To Play!", True, (255, 255, 255))
         screen.blit(self.spaceToPlay, (((screenW / 2) - 110), ((screenH / 2) + 30)))
         # Q to quit 
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 20)
         self.qToQuit = self.font.render("Press Q To Quit!", True, (255, 255, 255))
         screen.blit(self.qToQuit, (((screenW / 2) - 70), ((screenH / 2) + 260)))
         # M to mute
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 20)
         self.mToMute = self.font.render("Press M To Mute!", True, (255, 255, 255))
         screen.blit(self.mToMute, (((screenW / 2) - 75), ((screenH / 2) + 310)))
     def gameOver(self):
@@ -71,16 +80,20 @@ class UI:
         # Start Game Text
         screen.fill((100,100,100))
         screen.blit(background, (backgroundX, 0))
-        self.font = pygame.font.Font("assets/fonts/PressStart2P-vaV7.ttf", 50)
+        self.font = pygame.font.Font(resource_path("assets/fonts/PressStart2P-vaV7.ttf"), 50)
         self.startGameText = self.font.render("I Am Ninja.", True, (255, 255, 255))
         screen.blit(self.startGameText, (((screenW / 2) - 250), ((screenH / 2) - 150)))
+        # Credits
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 20)
+        self.spaceToPlay = self.font.render("By Dagmawi Babi", True, (255, 255, 255))
+        screen.blit(self.spaceToPlay, (((screenW / 2) - 60), ((screenH / 2) + 300)))
         # Space to play again
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 25)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 25)
         self.spaceToPlay = self.font.render("Press Space Key To Play!", True, (255, 255, 255))
         screen.blit(self.spaceToPlay, (((screenW / 2) - 115), ((screenH / 2) + 30)))
         #pygame.display.update()
     def stats(self):
-        font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
+        font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 20)
         playerKills = font.render("Kills " + str(numOfKills), True, (0, 255, 255))
         screen.blit(playerKills, (10, 5))
         playerPower = font.render("Power " + str(attackSize), True, (0, 255, 255))
@@ -107,67 +120,67 @@ class Player:
         self.ySpeed = self.speed
         self.animationIndex = 0
         self.playerIdleAnimation = [
-            pygame.image.load("assets/characters/ninja/Idle__000.png"),
-            pygame.image.load("assets/characters/ninja/Idle__001.png"),
-            pygame.image.load("assets/characters/ninja/Idle__002.png"),
-            pygame.image.load("assets/characters/ninja/Idle__003.png"),
-            pygame.image.load("assets/characters/ninja/Idle__004.png"),
-            pygame.image.load("assets/characters/ninja/Idle__005.png"),
-            pygame.image.load("assets/characters/ninja/Idle__006.png"),
-            pygame.image.load("assets/characters/ninja/Idle__007.png"),
-            pygame.image.load("assets/characters/ninja/Idle__008.png"),
-            pygame.image.load("assets/characters/ninja/Idle__009.png"),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__000.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__001.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__002.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__003.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__004.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__005.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__006.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__007.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__008.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Idle__009.png")),
         ]
         self.playerWalkAnimation = [
-            pygame.image.load("assets/characters/ninja/Run__000.png"),
-            pygame.image.load("assets/characters/ninja/Run__001.png"),
-            pygame.image.load("assets/characters/ninja/Run__002.png"),
-            pygame.image.load("assets/characters/ninja/Run__003.png"),
-            pygame.image.load("assets/characters/ninja/Run__004.png"),
-            pygame.image.load("assets/characters/ninja/Run__005.png"),
-            pygame.image.load("assets/characters/ninja/Run__006.png"),
-            pygame.image.load("assets/characters/ninja/Run__007.png"),
-            pygame.image.load("assets/characters/ninja/Run__008.png"),
-            pygame.image.load("assets/characters/ninja/Run__009.png"),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__000.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__001.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__002.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__003.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__004.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__005.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__006.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__007.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__008.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Run__009.png")),
         ]
         self.playerAttackAnimation = [
-            pygame.image.load("assets/characters/ninja/Attack__000.png"),
-            pygame.image.load("assets/characters/ninja/Attack__001.png"),
-            pygame.image.load("assets/characters/ninja/Attack__002.png"),
-            pygame.image.load("assets/characters/ninja/Attack__003.png"),
-            pygame.image.load("assets/characters/ninja/Attack__004.png"),
-            pygame.image.load("assets/characters/ninja/Attack__005.png"),
-            pygame.image.load("assets/characters/ninja/Attack__006.png"),
-            pygame.image.load("assets/characters/ninja/Attack__007.png"),
-            pygame.image.load("assets/characters/ninja/Attack__008.png"),
-            pygame.image.load("assets/characters/ninja/Attack__009.png"),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__000.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__001.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__002.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__003.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__004.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__005.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__006.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__007.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__008.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Attack__009.png")),
         ]
         self.playerDeadAnimation = [
-            pygame.image.load("assets/characters/ninja/Dead__000.png"),
-            pygame.image.load("assets/characters/ninja/Dead__001.png"),
-            pygame.image.load("assets/characters/ninja/Dead__002.png"),
-            pygame.image.load("assets/characters/ninja/Dead__003.png"),
-            pygame.image.load("assets/characters/ninja/Dead__004.png"),
-            pygame.image.load("assets/characters/ninja/Dead__005.png"),
-            pygame.image.load("assets/characters/ninja/Dead__006.png"),
-            pygame.image.load("assets/characters/ninja/Dead__007.png"),
-            pygame.image.load("assets/characters/ninja/Dead__008.png"),
-            pygame.image.load("assets/characters/ninja/Dead__009.png"),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__000.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__001.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__002.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__003.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__004.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__005.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__006.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__007.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__008.png")),
+            pygame.image.load(resource_path("assets/characters/ninja/Dead__009.png")),
         ]
-        #self.image = pygame.image.load(self.playerSprites[self.animationIndex])
+        #self.image = pygame.image.load(resource_path(self.playerSprites[self.animationIndex])
         self.idleScale = (70, 150)
         self.runScale = (100, 150)
         self.attackScale = (150, 165)
         self.deadScale = (150, 165)
         self.currentScale = self.idleScale
-        self.image = pygame.image.load("assets/characters/ninja/Idle__000.png")
+        self.image = pygame.image.load(resource_path("assets/characters/ninja/Idle__000.png"))
         self.image = pygame.transform.scale(self.image, self.currentScale)
         self.currentAnimation = self.playerIdleAnimation
         self.flipImageHorizontal = False
         self.direction = 0
         self.isAttacking = False
-        self.health = 10
-        self.slashSound = mixer.Sound("assets/soundeffects/mixkit-metal-hit-woosh-1485.wav")
+        self.health = 100
+        self.slashSound = mixer.Sound(resource_path("assets/soundeffects/mixkit-metal-hit-woosh-1485.wav"))
         self.slashSound.set_volume(0.4)
     def blit(self):
         screen.blit(self.image, (self.x, self.y))
@@ -228,7 +241,7 @@ class Player:
             self.x += self.xSpeed
     # Health
     def healthScore(self):
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 20)
         if self.health >= 80:
             healthColor = (0, 255, 255)
         elif self.health >= 50:
@@ -272,14 +285,14 @@ walkAnimationIndex = 0
 def WalkingAnimation(x, y, flipImageHorizontal):
     global walkAnimationIndex
     playerWalkDustAnimation = [
-        pygame.image.load("assets/vfx/dustCloud/1.png"),
-        pygame.image.load("assets/vfx/dustCloud/2.png"),
-        pygame.image.load("assets/vfx/dustCloud/3.png"),
-        pygame.image.load("assets/vfx/dustCloud/4.png"),
-        pygame.image.load("assets/vfx/dustCloud/5.png"),
-        pygame.image.load("assets/vfx/dustCloud/6.png"),
-        pygame.image.load("assets/vfx/dustCloud/7.png"),
-        pygame.image.load("assets/vfx/dustCloud/8.png"),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/1.png")),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/2.png")),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/3.png")),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/4.png")),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/5.png")),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/6.png")),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/7.png")),
+        pygame.image.load(resource_path("assets/vfx/dustCloud/8.png")),
     ]
     walkAnimationIndex += 1
     if walkAnimationIndex > (len(playerWalkDustAnimation) - 1):
@@ -300,12 +313,12 @@ def waterSplashAnimation(x, y):
     if ros == 0:
         delayTime = 0
     splashAnimation = [
-        pygame.image.load("assets/vfx/waterSplash/1.png"),
-        pygame.image.load("assets/vfx/waterSplash/2.png"),
-        pygame.image.load("assets/vfx/waterSplash/3.png"),
-        pygame.image.load("assets/vfx/waterSplash/4.png"),
-        pygame.image.load("assets/vfx/waterSplash/5.png"),
-        pygame.image.load("assets/vfx/waterSplash/6.png"),
+        pygame.image.load(resource_path("assets/vfx/waterSplash/1.png")),
+        pygame.image.load(resource_path("assets/vfx/waterSplash/2.png")),
+        pygame.image.load(resource_path("assets/vfx/waterSplash/3.png")),
+        pygame.image.load(resource_path("assets/vfx/waterSplash/4.png")),
+        pygame.image.load(resource_path("assets/vfx/waterSplash/5.png")),
+        pygame.image.load(resource_path("assets/vfx/waterSplash/6.png")),
     ]
     splashAnimationIndex += 1
     if splashAnimationIndex > (len(splashAnimation) - 1):
@@ -319,11 +332,31 @@ powerUpAnimationIndex = 0
 def powerUpAnimation(x, y):
     global powerUpAnimationIndex
     playerPowerUpAnimation = [
-        pygame.image.load("assets/vfx/powerUp/1.png"),
-        pygame.image.load("assets/vfx/powerUp/2.png"),
-        pygame.image.load("assets/vfx/powerUp/3.png"),
-        pygame.image.load("assets/vfx/powerUp/4.png"),
-        pygame.image.load("assets/vfx/powerUp/5.png"),
+        pygame.image.load(resource_path("assets/vfx/powerUp/1.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/1.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/1.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/1.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/1.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/2.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/2.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/2.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/2.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/2.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/3.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/3.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/3.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/3.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/3.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/4.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/4.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/4.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/4.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/4.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/5.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/5.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/5.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/5.png")),
+        pygame.image.load(resource_path("assets/vfx/powerUp/5.png")),
     ]
     powerUpAnimationIndex += 1
     if powerUpAnimationIndex > (len(playerPowerUpAnimation) - 1):
@@ -349,127 +382,127 @@ class Zombie:
         global listOfZombies
         if random.randint(0,1) < 1:
             self.zombieIdleAnimation = [
-                pygame.image.load("assets/characters/zombies/male/Idle (1).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (2).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (3).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (4).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (5).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (6).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (7).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (8).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (9).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (10).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (11).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (12).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (13).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (14).png"),
-                pygame.image.load("assets/characters/zombies/male/Idle (15).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (8).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (9).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (10).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (11).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (12).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (13).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (14).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Idle (15).png")),
             ]
             self.zombieWalkAnimation = [
-                pygame.image.load("assets/characters/zombies/male/Walk (1).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (2).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (3).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (4).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (5).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (6).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (7).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (8).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (9).png"),
-                pygame.image.load("assets/characters/zombies/male/Walk (10).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (8).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (9).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Walk (10).png")),
             ]
             self.zombieAttackAnimation = [
-                pygame.image.load("assets/characters/zombies/male/Attack (1).png"),
-                pygame.image.load("assets/characters/zombies/male/Attack (2).png"),
-                pygame.image.load("assets/characters/zombies/male/Attack (3).png"),
-                pygame.image.load("assets/characters/zombies/male/Attack (4).png"),
-                pygame.image.load("assets/characters/zombies/male/Attack (5).png"),
-                pygame.image.load("assets/characters/zombies/male/Attack (6).png"),
-                pygame.image.load("assets/characters/zombies/male/Attack (7).png"),
-                pygame.image.load("assets/characters/zombies/male/Attack (8).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Attack (8).png")),
             ]
             self.zombieDeadAnimation = [
-                pygame.image.load("assets/characters/zombies/male/Dead (1).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (2).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (3).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (4).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (5).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (6).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (7).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (8).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (9).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (10).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (11).png"),
-                pygame.image.load("assets/characters/zombies/male/Dead (12).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (8).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (9).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (10).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (11).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/male/Dead (12).png")),
             ]
         else:
             self.zombieIdleAnimation = [
-                pygame.image.load("assets/characters/zombies/female/Idle (1).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (2).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (3).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (4).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (5).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (6).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (7).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (8).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (9).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (10).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (11).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (12).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (13).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (14).png"),
-                pygame.image.load("assets/characters/zombies/female/Idle (15).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (8).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (9).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (10).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (11).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (12).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (13).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (14).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Idle (15).png")),
             ]
             self.zombieWalkAnimation = [
-                pygame.image.load("assets/characters/zombies/female/Walk (1).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (2).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (3).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (4).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (5).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (6).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (7).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (8).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (9).png"),
-                pygame.image.load("assets/characters/zombies/female/Walk (10).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (8).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (9).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Walk (10).png")),
             ]
             self.zombieAttackAnimation = [
-                pygame.image.load("assets/characters/zombies/female/Attack (1).png"),
-                pygame.image.load("assets/characters/zombies/female/Attack (2).png"),
-                pygame.image.load("assets/characters/zombies/female/Attack (3).png"),
-                pygame.image.load("assets/characters/zombies/female/Attack (4).png"),
-                pygame.image.load("assets/characters/zombies/female/Attack (5).png"),
-                pygame.image.load("assets/characters/zombies/female/Attack (6).png"),
-                pygame.image.load("assets/characters/zombies/female/Attack (7).png"),
-                pygame.image.load("assets/characters/zombies/female/Attack (8).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Attack (8).png")),
             ]
             self.zombieDeadAnimation = [
-                pygame.image.load("assets/characters/zombies/female/Dead (1).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (2).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (3).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (4).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (5).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (6).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (7).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (8).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (9).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (10).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (11).png"),
-                pygame.image.load("assets/characters/zombies/female/Dead (12).png"),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (1).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (2).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (3).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (4).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (5).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (6).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (7).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (8).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (9).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (10).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (11).png")),
+                pygame.image.load(resource_path("assets/characters/zombies/female/Dead (12).png")),
             ]
 
-        #self.image = pygame.image.load(self.playerSprites[self.animationIndex])
+        #self.image = pygame.image.load(resource_path(self.playerSprites[self.animationIndex])
         self.idleScale = (110, 175)
         self.runScale = (120, 175)
         self.attackScale = (150, 165)
         self.deadScale = (160, 170)
         self.currentScale = self.idleScale
-        self.image = pygame.image.load("assets/characters/zombies/male/Idle (1).png")
+        self.image = pygame.image.load(resource_path("assets/characters/zombies/male/Idle (1).png"))
         self.image = pygame.transform.scale(self.image, self.currentScale)
         self.currentAnimation = self.zombieIdleAnimation
         self.flipImageHorizontal = False
         self.direction = 0
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 20)
         self.isDead = False
-        self.bodyCutSound = mixer.Sound("assets/soundeffects/mixkit-gore-video-game-blood-splash-263.wav")
+        self.bodyCutSound = mixer.Sound(resource_path("assets/soundeffects/mixkit-gore-video-game-blood-splash-263.wav"))
         self.bodyCutSound.set_volume(0.1)
     def blit(self):
         screen.blit(self.image, (self.x, self.y))
@@ -514,7 +547,7 @@ class Zombie:
             self.x += self.xSpeed
     # Health
     def healthScore(self):
-        self.font = pygame.font.Font("assets/fonts/Abel-Regular.ttf", 20)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Abel-Regular.ttf"), 20)
         if self.health >= 80:
             healthColor = (0, 255, 0)
         elif self.health >= 50:
@@ -690,7 +723,7 @@ ui.backgroundMusic()
 gom = GameObjectManager()
 player = Player()
 numOfKills = 0
-background = pygame.image.load("assets/backgrounds/2.jpg")
+background = pygame.image.load(resource_path("assets/backgrounds/2.jpg"))
 background = pygame.transform.scale(background, ((background.get_width() - 4200), screenH))
 backgroundX = 0
 isGameOver = False
@@ -711,7 +744,7 @@ def gameInit():
     listOfZombies = []  
     listOfZombies.append(zombie)    
     screen.fill((0,0,0))
-    background = pygame.image.load("assets/backgrounds/2.jpg")
+    background = pygame.image.load(resource_path("assets/backgrounds/2.jpg"))
     background = pygame.transform.scale(background, ((background.get_width() - 5800), screenH))
     backgroundX = 0
     isGameOver = False
